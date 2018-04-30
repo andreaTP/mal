@@ -1,26 +1,45 @@
-#! /usr/bin/env crystal run
+require "io"
+require "readline"
 
-require "./readline"
+module Step0
+  extend self
 
-# Note:
-# Employed downcase names because Crystal prohibits uppercase names for methods
+  STDIN.blocking = true
+ 
+  def loopme()
+    instr = Readline.readline("user> ", true)
 
-def read(x)
-    x
+    if instr.nil?
+      exit 0
+    else
+      return instr
+    end
+  end
+
+  def read(*args)
+    return args[0]
+  end
+
+  def eval(*args)
+    return args[0]
+  end
+
+  def print(*args)
+    return args[0]
+  end
+
+  def rep()
+    return print(
+      eval(
+        read(
+          loopme
+        )
+      )
+    )
+  end
+  
 end
 
-def eval(x)
-    x
-end
-
-def print(x)
-    x
-end
-
-def rep(x)
-    read(eval(print(x)))
-end
-
-while line = my_readline("user> ")
-    puts rep(line)
+while true
+  puts Step0.rep()
 end

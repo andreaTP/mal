@@ -1,36 +1,54 @@
-#! /usr/bin/env crystal run
+require "io"
+require "readline"
 
-require "./readline"
 require "./reader"
 require "./printer"
 
-# Note:
-# Employed downcase names because Crystal prohibits uppercase names for methods
-
-module Mal
+module Step1
   extend self
 
-  def read(str)
-    read_str str
+  STDIN.blocking = true
+ 
+  def loopme()
+    instr = Readline.readline("user> ", true)
+
+    if instr.nil?
+      exit 0
+    else
+      return instr
+    end
   end
 
-  def eval(x)
-      x
+  def read(*args)
+    return Reader.read_str(args[0])
   end
 
-  def print(result)
-    pr_str(result, true)
+  def eval(*args)
+    return args[0]
   end
 
-  def rep(str)
-    print(eval(read(str)))
+  def print(*args)
+    return Printer.pr_str(args[0], print_readably: true)
   end
+
+  def rep()
+    return print(
+      eval(
+        read(
+          loopme
+        )
+      )
+    )
+  end
+  
 end
 
-while line = my_readline("user> ")
+while true
   begin
-    puts Mal.rep(line)
-  rescue e
-    STDERR.puts e
+    puts Step1.rep()
+  rescue Reader::CommentEx
+    # do nothing
+  rescue err
+    puts err.message
   end
 end
