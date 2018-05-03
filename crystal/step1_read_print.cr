@@ -4,10 +4,10 @@ require "readline"
 require "./reader"
 require "./printer"
 
+STDIN.blocking = true
+
 module Step1
   extend self
-
-  STDIN.blocking = true
  
   def loopme()
     instr = Readline.readline("user> ", true)
