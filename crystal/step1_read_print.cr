@@ -8,8 +8,8 @@ STDIN.blocking = true
 
 module Step1
   extend self
- 
-  def loopme()
+
+  def loopme
     instr = Readline.readline("user> ", true)
 
     if instr.nil?
@@ -31,7 +31,7 @@ module Step1
     return Printer.pr_str(args[0], print_readably: true)
   end
 
-  def rep()
+  def rep
     return print(
       eval(
         read(
@@ -40,12 +40,11 @@ module Step1
       )
     )
   end
-  
 end
 
 while true
   begin
-    puts Step1.rep()
+    puts Step1.rep
   rescue Reader::CommentEx
     # do nothing
   rescue err

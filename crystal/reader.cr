@@ -4,7 +4,6 @@ module Reader
   extend self
 
   class Reader
-
     @tokens = [] of String
     @position = 0
 
@@ -20,7 +19,6 @@ module Reader
     def peek
       return @tokens[@position]
     end
-
   end
 
   def read_str(str) : Mal::Type
@@ -52,20 +50,20 @@ module Reader
     when "("
       return read_list(reader, end_char: ")")
     when "["
-      vec = Mal::Vector(Mal::Type).new()
+      vec = Mal::Vector(Mal::Type).new
       read_list(reader, end_char: "]").each do |e|
         vec << e
       end
       return vec
     when "{"
-      map = Mal::Map(Mal::MapKey, Mal::Type).new()
+      map = Mal::Map(Mal::MapKey, Mal::Type).new
       elems = read_list(reader, end_char: "}")
-      elems.each_index do | i |
+      elems.each_index do |i|
         if i % 2 == 0
           key = elems[i]
           case key
           when Mal::MapKey
-            map[key]= elems[i + 1]
+            map[key] = elems[i + 1]
           else
             raise "error in matching"
           end
@@ -88,11 +86,11 @@ module Reader
   end
 
   def get_s(str)
-    if_match(str, /["](.*)["]/) { | match | match.captures.compact[0] }
+    if_match(str, /["](.*)["]/) { |match| match.captures.compact[0] }
   end
 
   def is_s(str)
-    if_match(str, /["](.*)["]/) { | _ | str }
+    if_match(str, /["](.*)["]/) { |_| str }
   end
 
   def if_cond(str, &block)
@@ -103,7 +101,8 @@ module Reader
     end
   end
 
-  class CommentEx < Exception end
+  class CommentEx < Exception
+  end
 
   def read_macro(name, reader)
     list = [] of Mal::Type
@@ -114,7 +113,6 @@ module Reader
   end
 
   def read_atom(reader) : Mal::Type
-
     case reader.peek
     when if_cond(reader.peek) { reader.peek.starts_with?(';') }
       raise CommentEx.new
@@ -136,9 +134,9 @@ module Reader
       return read_macro("unquote", reader)
     when is_s(reader.peek)
       return get_s(reader.peek).not_nil!
-        .gsub("\\\"", "\"")
-        .gsub("\\n", "\n")
-        .gsub("\\\\", "\\")
+                               .gsub("\\\"", "\"")
+                               .gsub("\\n", "\n")
+                               .gsub("\\\\", "\\")
     when .to_i64?
       return reader.peek.to_i64
     when .to_s

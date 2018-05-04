@@ -1,14 +1,9 @@
 #####################
 
-# SOURCES_BASE = types.nim reader.nim printer.nim
-# SOURCES_LISP = env.nim core.nim stepA_mal.nim
-# SOURCES = $(SOURCES_BASE) $(SOURCES_LISP)
-# SOURCES_REBUILD = $(SOURCES_BASE) env.nim core.nim
-
-#####################
-
 SRCS = step0_repl.cr \
-			 step1_read_print.cr
+			 step1_read_print.cr \
+			 step2_eval.cr
+
 BINS = $(SRCS:%.cr=%)
 
 #####################

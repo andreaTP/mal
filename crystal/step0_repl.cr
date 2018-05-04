@@ -5,8 +5,8 @@ module Step0
   extend self
 
   STDIN.blocking = true
- 
-  def loopme()
+
+  def loopme
     instr = Readline.readline("user> ", true)
 
     if instr.nil?
@@ -28,7 +28,7 @@ module Step0
     return args[0]
   end
 
-  def rep()
+  def rep
     return print(
       eval(
         read(
@@ -37,9 +37,8 @@ module Step0
       )
     )
   end
-  
 end
 
 while true
-  puts Step0.rep()
+  puts Step0.rep
 end

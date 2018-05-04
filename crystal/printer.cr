@@ -4,7 +4,7 @@ module Printer
   extend self
 
   def print_each(str, mal : Mal::Type)
-    mal.each_index do | i |
+    mal.each_index do |i|
       if i > 0
         str << ' '
       end
@@ -12,7 +12,7 @@ module Printer
     end
   end
 
-  def pr_str(mal : Mal::Type, print_readably = true)
+  def pr_str(mal, print_readably = true)
     case mal
     when Nil
       return "nil"
@@ -21,10 +21,10 @@ module Printer
     when String
       if print_readably
         readable = mal
-        .gsub("\\", "\\\\")
-        .gsub("\"", "\\\"")
-        .gsub("\n", "\\n")
-        
+          .gsub("\\", "\\\\")
+          .gsub("\"", "\\\"")
+          .gsub("\n", "\\n")
+
         return "\"#{readable}\""
       else
         return "\"#{mal}\""
@@ -40,7 +40,7 @@ module Printer
       str = String.build do |str|
         str << '{'
         first = true
-        mal.each_key do | k |
+        mal.each_key do |k|
           if !first
             str << ' '
             first = false
@@ -57,6 +57,8 @@ module Printer
         str << ')'
       end
       return str
-    end      
+    else
+      raise "printer didn't matched the type"
+    end
   end
 end
