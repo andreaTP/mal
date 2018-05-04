@@ -10,8 +10,8 @@ STDIN.blocking = true
 
 module Step1
   extend self
- 
-  def loopme()
+
+  def loopme
     instr = Readline.readline("user> ", true)
 
     if instr.nil?
@@ -25,38 +25,46 @@ module Step1
     return Reader.read_str(args[0])
   end
 
-  alias MalApply = Mal::Type | Proc(Array(MalApply), Mal::Type) | Array(MalApply)
-
   REPL_ENV = {
-    "+" => ->(args : Array(MalApply)) { (args[0].as(Int64) + args[1].as(Int64)).as(Mal::Type) },
-    "-" => ->(args : Array(MalApply)) { (args[0].as(Int64) - args[1].as(Int64)).as(Mal::Type) },
-    "*" => ->(args : Array(MalApply)) { (args[0].as(Int64) * args[1].as(Int64)).as(Mal::Type) },
-    "/" => ->(args : Array(MalApply)) { (args[0].as(Int64) / args[1].as(Int64)).to_i64.as(Mal::Type) },
+    "+" => ->(args : Array(Mal::Type)) { (args[0].as(Int64) + args[1].as(Int64)).as(Mal::Type) },
+    "-" => ->(args : Array(Mal::Type)) { (args[0].as(Int64) - args[1].as(Int64)).as(Mal::Type) },
+    "*" => ->(args : Array(Mal::Type)) { (args[0].as(Int64) * args[1].as(Int64)).as(Mal::Type) },
+    "/" => ->(args : Array(Mal::Type)) { (args[0].as(Int64) / args[1].as(Int64)).to_i64.as(Mal::Type) },
   }
 
-  def eval_ast(ast, env : Hash(String, Proc(Array(MalApply), Mal::Type))) : MalApply
+  def eval_ast(ast, env : Hash(String, Proc(Array(Mal::Type), Mal::Type))) : Mal::Type
     case ast
     when Mal::Symbol
       return env[ast.to_s]
-    when Array
-      return ast.map { | e | eval(e).as(MalApply) }
-    else
+    when Hash
+      ast.each_key { |k| ast[k]=eval(ast[k])}
       return ast
+    when Array
+      ast.map! { |e| eval(e).as(Mal::Type) }
+      return ast # .map! { |e| eval(e).as(Mal::Type) }
+    when Mal::Type
+      return ast
+    else
+      raise "should not end up here"
     end
   end
 
-  def func_call(elems : MalApply)
+  def func_call(elems : Mal::Type)
     func = elems.first
     case func
-    when Proc(Array(MalApply), Mal::Type)
+    when Proc(Array(Mal::Type), Mal::Type)
       return func.call(elems.skip(1))
     else
       raise "no operation in head position"
     end
   end
 
-  def eval(ast) : MalApply
+  def eval(ast) : Mal::Type
     case ast
+    when Mal::Vector
+      return eval_ast(ast, REPL_ENV)
+    when Mal::Map
+      return eval_ast(ast, REPL_ENV)
     when Array
       if ast.empty?
         return ast
@@ -69,10 +77,10 @@ module Step1
   end
 
   def print(*args)
-    return Printer.pr_str(args[0].as(Mal::Type), print_readably: true)
+    return Printer.pr_str(args[0], print_readably: true)
   end
 
-  def rep()
+  def rep
     return print(
       eval(
         read(
@@ -81,12 +89,11 @@ module Step1
       )
     )
   end
-  
 end
 
 while true
   begin
-    puts Step1.rep()
+    puts Step1.rep
   rescue Reader::CommentEx
     # do nothing
   rescue err

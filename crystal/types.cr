@@ -37,5 +37,6 @@ module Mal
                Map(MapKey, Type) |
                Bool |
                Nil |
-               String
+               String |
+               Proc(Array(Mal::Type), Mal::Type)
 end
