@@ -40,7 +40,7 @@ module Step1
       ast.each_key { |k| ast[k] = eval(ast[k]) }
       return ast
     when Array
-      ast.map! { |e| eval(e).as(Mal::Type) }
+      ast.map! { |e| eval(e) }
       return ast
     when Mal::Type
       return ast
