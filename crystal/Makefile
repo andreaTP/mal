@@ -16,6 +16,7 @@ mal: $(word $(words $(BINS)),$(BINS))
 	cp $< $@
 
 $(BINS): %: %.cr $(SOURCES_REBUILD)
+	crystal tool format
 	#crystal --release $@
 	crystal build $@.cr
 

@@ -32,39 +32,35 @@ module Step1
     "/" => ->(args : Array(Mal::Type)) { (args[0].as(Int64) / args[1].as(Int64)).to_i64.as(Mal::Type) },
   }
 
-  def eval_ast(ast, env : Hash(String, Proc(Array(Mal::Type), Mal::Type))) : Mal::Type
+  def eval_ast(ast, env)
     case ast
     when Mal::Symbol
       return env[ast.to_s]
     when Hash
-      ast.each_key { |k| ast[k]=eval(ast[k])}
+      ast.each_key { |k| ast[k] = eval(ast[k]) }
       return ast
     when Array
       ast.map! { |e| eval(e).as(Mal::Type) }
-      return ast # .map! { |e| eval(e).as(Mal::Type) }
+      return ast
     when Mal::Type
       return ast
     else
-      raise "should not end up here"
+      raise "unrecognised ast node"
     end
   end
 
-  def func_call(elems : Mal::Type)
+  def func_call(elems)
     func = elems.first
     case func
     when Proc(Array(Mal::Type), Mal::Type)
       return func.call(elems.skip(1))
     else
-      raise "no operation in head position"
+      return elems
     end
   end
 
-  def eval(ast) : Mal::Type
+  def eval(ast)
     case ast
-    when Mal::Vector
-      return eval_ast(ast, REPL_ENV)
-    when Mal::Map
-      return eval_ast(ast, REPL_ENV)
     when Array
       if ast.empty?
         return ast
