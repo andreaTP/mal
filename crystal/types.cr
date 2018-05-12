@@ -8,6 +8,8 @@ module Mal
     def to_s(io : IO)
       io << @str
     end
+
+    def_equals_and_hash @str
   end
 
   class Keyword
@@ -19,6 +21,8 @@ module Mal
     def to_s(io : IO)
       io << @str
     end
+
+    def_equals_and_hash @str
   end
 
   class Vector(T) < Array(T)

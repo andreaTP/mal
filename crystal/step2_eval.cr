@@ -8,7 +8,7 @@ require "./types"
 
 STDIN.blocking = true
 
-module Step1
+module Step2
   extend self
 
   def loopme
@@ -89,7 +89,7 @@ end
 
 while true
   begin
-    puts Step1.rep
+    puts Step2.rep
   rescue Reader::CommentEx
     # do nothing
   rescue err

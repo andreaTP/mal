@@ -2,11 +2,14 @@
 
 SRCS = step0_repl.cr \
 			 step1_read_print.cr \
-			 step2_eval.cr
+			 step2_eval.cr \
+			 step3_env.cr
 
 BINS = $(SRCS:%.cr=%)
 
 #####################
+
+.PHONY: $(BINS)
 
 all: $(BINS)
 
