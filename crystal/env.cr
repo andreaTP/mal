@@ -5,7 +5,8 @@ module Env
     @outer : (Env | Nil) = nil
     @data = Hash(Mal::Symbol, Mal::Type).new
 
-    def initialize(@outer = nil)
+    def initialize(@outer = nil, binds = Array(Mal::Type).new, exprs = Array(Mal::Type).new)
+      binds.each_index { |i| set(binds[i].as(Mal::Symbol), exprs[i]) }
     end
 
     def set(sym, value)

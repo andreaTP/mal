@@ -29,6 +29,8 @@ module Printer
       else
         return "\"#{mal}\""
       end
+    when Proc(Array(Mal::Type), Mal::Type)
+      return "#<function>"
     when Mal::Vector(Mal::Type)
       str = String.build do |str|
         str << '['
