@@ -21,16 +21,6 @@ module Step4
       end
     end
 
-    def loopme
-      instr = Readline.readline("user> ", true)
-
-      if instr.nil?
-        exit 0
-      else
-        return instr
-      end
-    end
-
     def read(*args)
       return Reader.read_str(args[0])
     end
@@ -139,11 +129,11 @@ module Step4
       return Printer.pr_str(args[0], print_readably: true)
     end
 
-    def rep
+    def rep(str)
       return print(
         eval(
           read(
-            loopme
+            str
           ), @repl_env
         )
       )
@@ -152,10 +142,18 @@ module Step4
 end
 
 step = Step4::Step.new
+# define not
+step.rep("(def! not (fn* (a) (if a false true)))")
 
 while true
   begin
-    puts step.rep
+    instr = Readline.readline("user> ", true)
+
+    if instr.nil?
+      exit 0
+    else
+      puts step.rep(instr)
+    end
   rescue Reader::CommentEx
     # do nothing
   rescue err

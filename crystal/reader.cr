@@ -133,10 +133,26 @@ module Reader
     when if_cond(reader.peek) { reader.peek.starts_with?('~') }
       return read_macro("unquote", reader)
     when is_s(reader.peek)
-      return get_s(reader.peek).not_nil!
-                               .gsub("\\\"", "\"")
-                               .gsub("\\n", "\n")
-                               .gsub("\\\\", "\\")
+      str = String.build do |str|
+        slash = false
+        get_s(reader.peek).not_nil!.each_char do |c|
+          if !slash && c == '\\'
+            slash = true
+          elsif slash
+            if c == 'n'
+              str << '\n'
+            elsif c == '"'
+              str << '"'
+            elsif c == '\\'
+              str << '\\'
+            end
+            slash = false
+          else
+            str << c
+          end
+        end
+      end
+      return str
     when .to_i64?
       return reader.peek.to_i64
     when .to_s

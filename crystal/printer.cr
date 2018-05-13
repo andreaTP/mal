@@ -3,12 +3,12 @@ require "./types"
 module Printer
   extend self
 
-  def print_each(str, mal : Mal::Type)
+  def print_each(str, mal : Mal::Type, print_readably)
     mal.each_index do |i|
       if i > 0
         str << ' '
       end
-      str << pr_str(mal[i])
+      str << pr_str(mal[i], print_readably)
     end
   end
 
@@ -20,21 +20,30 @@ module Printer
       return mal.to_s
     when String
       if print_readably
-        readable = mal
-          .gsub("\\", "\\\\")
-          .gsub("\"", "\\\"")
-          .gsub("\n", "\\n")
+        str = String.build do |str|
+          mal.each_char do |c|
+            if c == '\n'
+              str << %{\\n}
+            elsif c == '"'
+              str << %{\\\"}
+            elsif c == '\\'
+              str << %{\\\\}
+            else
+              str << c
+            end
+          end
+        end
 
-        return "\"#{readable}\""
+        return "\"#{str}\""
       else
-        return "\"#{mal}\""
+        return "#{mal}"
       end
     when Proc(Array(Mal::Type), Mal::Type)
       return "#<function>"
     when Mal::Vector(Mal::Type)
       str = String.build do |str|
         str << '['
-        print_each(str, mal)
+        print_each(str, mal, print_readably)
         str << ']'
       end
       return str
@@ -45,9 +54,9 @@ module Printer
         mal.each_key do |k|
           if !first
             str << ' '
-            first = false
           end
-          str << pr_str(k) << ' ' << pr_str(mal[k])
+          first = false
+          str << pr_str(k, print_readably) << ' ' << pr_str(mal[k], print_readably)
         end
         str << '}'
       end
@@ -55,7 +64,7 @@ module Printer
     when Array(Mal::Type)
       str = String.build do |str|
         str << '('
-        print_each(str, mal)
+        print_each(str, mal, print_readably)
         str << ')'
       end
       return str
