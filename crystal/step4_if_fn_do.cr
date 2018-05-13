@@ -31,16 +31,20 @@ module Step4
         res = env.get(ast)
         return res
       when Hash
-        evaluated = ast # just to make the compiler happy...
+        evaluated = ast # to make the compiler happy
         keys = ast.keys
         vals = ast.values
         keys.each_index { |i| evaluated[keys[i]] = eval(vals[i], env) }
 
         return evaluated
       when Array
-        evaluated = [] of Mal::Type
+        evaluated = Mal::Vector(Mal::Type).new
         ast.each { |e| evaluated << eval(e, env) }
-        return evaluated
+        if ast.is_a?(Mal::Vector)
+          return evaluated
+        else
+          return evaluated.as(Array)
+        end
       when Mal::Type
         return ast
       else

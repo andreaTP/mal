@@ -35,7 +35,7 @@ module Core
       args.as_mal
     },
     mal_symbol("list?") => ->(args : Args) {
-      args[0].is_a?(Array).as_mal
+      (args[0].is_a?(Array) && !args[0].is_a?(Mal::Vector)).as_mal
     },
     mal_symbol("empty?") => ->(args : Args) {
       args0 = args[0]
