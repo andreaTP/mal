@@ -5,8 +5,8 @@ module Env
     @outer : (Env | Nil) = nil
     @data = Hash(Mal::Symbol, Mal::Type).new
 
-    def initialize(@outer = nil, binds = Array(Mal::Type).new, exprs = Array(Mal::Type).new)
-      binds.each_index { |i| set(binds[i].as(Mal::Symbol), exprs[i]) }
+    def initialize(@outer = nil, binds = Array(Mal::Symbol).new, exprs = Array(Mal::Type).new)
+      binds.each_index { |i| @data[binds[i]] = exprs[i] }
     end
 
     def set(sym, value)
@@ -31,7 +31,7 @@ module Env
     def get(sym)
       env = find(sym)
       if env.nil?
-        raise "Not found"
+        raise "Not found #{sym}"
       else
         return env.@data[sym]
       end

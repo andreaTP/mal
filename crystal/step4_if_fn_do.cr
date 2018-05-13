@@ -38,13 +38,19 @@ module Step4
     def eval_ast(ast, env)
       case ast
       when Mal::Symbol
-        return env.get(ast)
+        res = env.get(ast)
+        return res
       when Hash
-        ast.each_key { |k| ast[k] = eval(ast[k], env) }
-        return ast
+        evaluated = ast # just to make the compiler happy...
+        keys = ast.keys
+        vals = ast.values
+        keys.each_index { |i| evaluated[keys[i]] = eval(vals[i], env) }
+
+        return evaluated
       when Array
-        ast.map! { |e| eval(e, env) }
-        return ast
+        evaluated = [] of Mal::Type
+        ast.each { |e| evaluated << eval(e, env) }
+        return evaluated
       when Mal::Type
         return ast
       else
@@ -70,7 +76,7 @@ module Step4
 
     FN_SYM = Mal::Symbol.new("fn*")
 
-    def eval(ast, env)
+    def eval(ast : Mal::Type, env)
       case ast
       when Array
         if ast.empty?
@@ -78,13 +84,7 @@ module Step4
         else
           case ast[0]
           when DO_SYM
-            last = nil
-            ast.skip(1).each do |e|
-              # in the text is eval_ast ...why?
-              last = eval_ast(e, env)
-              # last = eval(e, env)
-            end
-            return eval(last, env)
+            return eval_ast(ast.skip(1), env).last
           when IF_SYM
             if eval(ast[1], env)
               return eval(ast[2], env)
@@ -109,7 +109,9 @@ module Step4
               eval(ast2, Env::Env.new(env, binds, args)).as(Mal::Type)
             }
           when DEF_SYM
-            env.set(ast[1].as(Mal::Symbol), eval(ast[2], env))
+            ast1 = ast[1].as(Mal::Symbol)
+            ast2 = ast[2]
+            env.set(ast1, eval(ast2, env))
           when LET_SYM
             let_env = Env::Env.new(env)
             let_arg = ast[1]
@@ -124,7 +126,8 @@ module Step4
 
             return eval(ast[2], let_env)
           else
-            return func_call(eval_ast(ast, env))
+            el = eval_ast(ast, env)
+            return func_call(el)
           end
         end
       else

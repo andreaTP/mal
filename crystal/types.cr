@@ -10,6 +10,7 @@ module Mal
     end
 
     def_equals_and_hash @str
+    def_clone
   end
 
   class Keyword
@@ -23,6 +24,7 @@ module Mal
     end
 
     def_equals_and_hash @str
+    def_clone
   end
 
   class Vector(T) < Array(T)
