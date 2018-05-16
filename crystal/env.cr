@@ -25,7 +25,7 @@ module Env
       end
     end
 
-    def set(sym, value)
+    def set(sym : Mal::Symbol, value : Mal::Type)
       @data[sym] = value
     end
 

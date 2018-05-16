@@ -1,5 +1,8 @@
+require "file"
+
 require "./types"
 require "./printer"
+require "./reader"
 
 module AsMal
   def as_mal
@@ -15,7 +18,24 @@ class Object
   include AsMal
 end
 
+module PrintHelper
+  def print_str(args, separator, readable)
+    str = String.build do |str|
+      first = true
+      args.each do |a|
+        if !first
+          str << separator
+        end
+        first = false
+        str << Printer.pr_str(a, print_readably: readable)
+      end
+    end
+    return str
+  end
+end
+
 module Core
+  extend PrintHelper
   alias Args = Array(Mal::Type)
 
   NS = {
@@ -72,16 +92,7 @@ module Core
       (args[0].as(Int64) >= args[1].as(Int64)).as_mal
     },
     mal_symbol("pr-str") => ->(args : Args) {
-      str = String.build do |str|
-        first = true
-        args.each do |a|
-          if !first
-            str << ' '
-          end
-          first = false
-          str << Printer.pr_str(a, print_readably: true)
-        end
-      end
+      str = print_str(args, ' ', true)
       str.as_mal
     },
     mal_symbol("str") => ->(args : Args) {
@@ -93,34 +104,21 @@ module Core
       str.as_mal
     },
     mal_symbol("prn") => ->(args : Args) {
-      # same as sp-str to be rafactored
-      str = String.build do |str|
-        first = true
-        args.each do |a|
-          if !first
-            str << ' '
-          end
-          first = false
-          str << Printer.pr_str(a, print_readably: true)
-        end
-      end
+      str = print_str(args, ' ', true)
       puts str
       nil.as_mal
     },
     mal_symbol("println") => ->(args : Args) {
-      # same as sp-str to be rafactored
-      str = String.build do |str|
-        first = true
-        args.each do |a|
-          if !first
-            str << ' '
-          end
-          first = false
-          str << Printer.pr_str(a, print_readably: false)
-        end
-      end
+      str = print_str(args, ' ', false)
       puts str
       nil.as_mal
+    },
+    mal_symbol("read-string") => ->(args : Args) {
+      # not sure why .as_mal is not working...
+      Reader.read_str(args[0].as(String)).as(Mal::Type)
+    },
+    mal_symbol("slurp") => ->(args : Args) {
+      File.read(args[0].as(String)).as_mal
     },
   }
 end

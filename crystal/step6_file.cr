@@ -9,7 +9,7 @@ require "./core"
 
 STDIN.blocking = true
 
-module Step5
+module Step6
   extend self
 
   class Step
@@ -19,6 +19,11 @@ module Step5
       Core::NS.each do |k, v|
         @repl_env.set(k, v)
       end
+      @repl_env.set(EVAL_SYM,
+        ->(args : Array(Mal::Type)) {
+          eval(args[0], @repl_env).as(Mal::Type)
+        }.as(Proc(Array(Mal::Type), Mal::Type))
+      )
     end
 
     def read(*args)
@@ -69,6 +74,8 @@ module Step5
     IF_SYM = Mal::Symbol.new("if")
 
     FN_SYM = Mal::Symbol.new("fn*")
+
+    EVAL_SYM = Mal::Symbol.new("eval")
 
     def eval(ast : Mal::Type, env)
       while true
@@ -156,9 +163,11 @@ module Step5
   end
 end
 
-step = Step5::Step.new
+step = Step6::Step.new
 # define not
 step.rep("(def! not (fn* (a) (if a false true)))")
+# define load-file
+step.rep(%{(def! load-file (fn* (f) (eval (read-string (str "(do " (slurp f) ")")))))})
 
 while true
   begin
