@@ -33,6 +33,16 @@ module Mal
   class Map(MapKey, T) < Hash(MapKey, T)
   end
 
+  class MalFunc
+    getter ast : Mal::Type
+    getter params : Mal::Type
+    getter env : Env::Env
+    getter fn : Proc(Array(Mal::Type), Mal::Type)
+
+    def initialize(@ast, @params, @env, @fn)
+    end
+  end
+
   alias MapKey = Mal::Keyword | String
 
   alias Type = Mal::Symbol |
@@ -44,5 +54,6 @@ module Mal
                Bool |
                Nil |
                String |
-               Proc(Array(Mal::Type), Mal::Type)
+               Proc(Array(Mal::Type), Mal::Type) |
+               MalFunc
 end

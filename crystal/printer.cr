@@ -38,7 +38,7 @@ module Printer
       else
         return "#{mal}"
       end
-    when Proc(Array(Mal::Type), Mal::Type)
+    when Proc(Array(Mal::Type), Mal::Type) | Mal::MalFunc
       return "#<function>"
     when Mal::Vector(Mal::Type)
       str = String.build do |str|

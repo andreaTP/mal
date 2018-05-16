@@ -4,7 +4,8 @@ SRCS = step0_repl.cr \
 			 step1_read_print.cr \
 			 step2_eval.cr \
 			 step3_env.cr \
-			 step4_if_fn_do.cr
+			 step4_if_fn_do.cr \
+			 step5_tco.cr
 
 BINS = $(SRCS:%.cr=%)
 

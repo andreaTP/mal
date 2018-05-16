@@ -8,12 +8,19 @@ module Env
     @data = Hash(Mal::Symbol, Mal::Type).new
 
     def initialize(@outer = nil, binds = Array(Mal::Symbol).new, exprs = Array(Mal::Type).new)
-      binds.each_index do |i|
-        if binds[i] == AT_SYM
-          @data[binds[i + 1]] = exprs.skip(i)
-          break
-        else
-          @data[binds[i]] = exprs[i]
+      case binds
+      when Array
+        binds.each_index do |i|
+          bindsi = binds[i]
+          case bindsi
+          when Mal::Symbol
+            if bindsi == AT_SYM
+              @data[binds[i + 1].as(Mal::Symbol)] = exprs.skip(i)
+              break
+            else
+              @data[bindsi] = exprs[i]
+            end
+          end
         end
       end
     end
