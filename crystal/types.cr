@@ -38,8 +38,10 @@ module Mal
     getter params : Mal::Type
     getter env : Env::Env
     getter fn : Proc(Array(Mal::Type), Mal::Type)
+    getter is_macro : Bool
+    setter is_macro : Bool
 
-    def initialize(@ast, @params, @env, @fn)
+    def initialize(@ast, @params, @env, @fn, @is_macro = false)
     end
   end
 

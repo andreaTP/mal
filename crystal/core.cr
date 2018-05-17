@@ -159,5 +159,27 @@ module Core
       args.each { |e| ret.concat(e.as(Array)) }
       ret.as_mal
     },
+    mal_symbol("nth") => ->(args : Args) {
+      begin
+        args.as(Array)[0].as(Array)[(args.as(Array)[1]).as(Int64)].as(Mal::Type)
+      rescue
+        raise "nth: index out of range"
+        nil.as_mal
+      end
+    },
+    mal_symbol("first") => ->(args : Args) {
+      begin
+        args.as(Array)[0].as(Array)[0].as(Mal::Type)
+      rescue
+        nil.as_mal
+      end
+    },
+    mal_symbol("rest") => ->(args : Args) {
+      begin
+        args.as(Array)[0].as(Array).skip(1).as(Mal::Type)
+      rescue
+        ([] of (Mal::Type)).as(Mal::Type)
+      end
+    },
   }
 end
