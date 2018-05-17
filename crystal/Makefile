@@ -6,7 +6,8 @@ SRCS = step0_repl.cr \
 			 step3_env.cr \
 			 step4_if_fn_do.cr \
 			 step5_tco.cr \
-			 step6_file.cr
+			 step6_file.cr \
+			 step7_quote.cr
 
 BINS = $(SRCS:%.cr=%)
 

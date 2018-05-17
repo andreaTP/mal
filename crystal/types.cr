@@ -56,6 +56,7 @@ module Mal
   alias Type = Mal::Symbol |
                Mal::Keyword |
                Int64 |
+               Array(Mal::Type) |
                Vector(Type) |
                Array(Type) |
                Map(MapKey, Type) |

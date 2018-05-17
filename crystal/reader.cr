@@ -49,6 +49,14 @@ module Reader
     case reader.peek
     when "@"
       return read_macro("deref", reader)
+    when "\'"
+      return read_macro("quote", reader)
+    when "`"
+      return read_macro("quasiquote", reader)
+    when "~@"
+      return read_macro("splice-unquote", reader)
+    when "~"
+      return read_macro("unquote", reader)
     when "("
       return read_list(reader, end_char: ")")
     when "["
@@ -126,14 +134,6 @@ module Reader
       return nil
     when if_cond(reader.peek) { reader.peek.starts_with?(':') }
       return Mal::Keyword.new(reader.peek.to_s)
-    when if_cond(reader.peek) { reader.peek.starts_with?('\'') }
-      return read_macro("quote", reader)
-    when if_cond(reader.peek) { reader.peek.starts_with?('`') }
-      return read_macro("quasiquote", reader)
-    when if_cond(reader.peek) { reader.peek.starts_with?("~@") }
-      return read_macro("splice-unquote", reader)
-    when if_cond(reader.peek) { reader.peek.starts_with?('~') }
-      return read_macro("unquote", reader)
     when is_s(reader.peek)
       str = String.build do |str|
         slash = false

@@ -149,5 +149,15 @@ module Core
       end
       atom.data.as(Mal::Type)
     },
+    mal_symbol("cons") => ->(args : Args) {
+      res = [] of Mal::Type
+      res << args[0]
+      res.concat(args[1].as(Array)).as(Mal::Type)
+    },
+    mal_symbol("concat") => ->(args : Args) {
+      ret = [] of Mal::Type
+      args.each { |e| ret.concat(e.as(Array)) }
+      ret.as_mal
+    },
   }
 end
