@@ -43,6 +43,14 @@ module Mal
     end
   end
 
+  class Atom
+    getter data : Mal::Type
+    setter data : Mal::Type
+
+    def initialize(@data)
+    end
+  end
+
   alias MapKey = Mal::Keyword | String
 
   alias Type = Mal::Symbol |
@@ -55,5 +63,6 @@ module Mal
                Nil |
                String |
                Proc(Array(Mal::Type), Mal::Type) |
-               MalFunc
+               MalFunc |
+               Atom
 end

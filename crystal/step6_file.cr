@@ -169,18 +169,30 @@ step.rep("(def! not (fn* (a) (if a false true)))")
 # define load-file
 step.rep(%{(def! load-file (fn* (f) (eval (read-string (str "(do " (slurp f) ")")))))})
 
-while true
-  begin
-    instr = Readline.readline("user> ", true)
+vec = [] of Mal::Type
+ARGV.skip(1).each { |e| vec << e.as(Mal::Type) }
+step.@repl_env.set(Mal::Symbol.new("*ARGV*"), vec)
 
-    if instr.nil?
-      exit 0
-    else
-      puts step.rep(instr)
+if ARGV[0]?
+  step.rep(%{(load-file "#{ARGV[0]}")})
+  exit 0
+else
+  while true
+    begin
+      prompt = "user> "
+      instr = Readline.readline(prompt, true)
+
+      if instr.nil?
+        exit 0
+      else
+        begin
+          puts step.rep(instr)
+        rescue Reader::CommentEx
+          # do nothing
+        end
+      end
+    rescue err
+      puts err.message
     end
-  rescue Reader::CommentEx
-    # do nothing
-  rescue err
-    puts err.message
   end
 end

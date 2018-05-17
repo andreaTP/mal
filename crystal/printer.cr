@@ -68,6 +68,8 @@ module Printer
         str << ')'
       end
       return str
+    when Mal::Atom
+      return "(atom #{mal.data})"
     else
       raise "printer didn't matched the type"
     end

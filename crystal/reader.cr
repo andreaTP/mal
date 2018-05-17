@@ -47,6 +47,8 @@ module Reader
 
   def read_form(reader, end_char) : Mal::Type
     case reader.peek
+    when "@"
+      return read_macro("deref", reader)
     when "("
       return read_list(reader, end_char: ")")
     when "["
@@ -165,14 +167,14 @@ module Reader
   def read_list(reader, end_char)
     list = [] of Mal::Type
 
-    begin
-      while reader.next != end_char
+    while reader.next != end_char
+      begin
         list << read_form(reader, end_char)
+      rescue CommentEx
+        # do nothing
       end
-
-      return list
-    rescue err
-      raise "Error matching list (#{err.message})"
     end
+
+    return list
   end
 end

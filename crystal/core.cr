@@ -118,7 +118,36 @@ module Core
       Reader.read_str(args[0].as(String)).as(Mal::Type)
     },
     mal_symbol("slurp") => ->(args : Args) {
-      File.read(args[0].as(String)).as_mal
+      File.read(args[0].to_s).as_mal
+    },
+    mal_symbol("atom") => ->(args : Args) {
+      Mal::Atom.new(args[0]).as_mal
+    },
+    mal_symbol("atom?") => ->(args : Args) {
+      args[0].is_a?(Mal::Atom).as_mal
+    },
+    mal_symbol("deref") => ->(args : Args) {
+      args[0].as(Mal::Atom).data.as(Mal::Type)
+    },
+    mal_symbol("reset!") => ->(args : Args) {
+      atom = args[0].as(Mal::Atom)
+      atom.data = args[1]
+      atom.data.as(Mal::Type)
+    },
+    mal_symbol("swap!") => ->(args : Args) {
+      atom = args[0].as(Mal::Atom)
+      fn_args = [] of Mal::Type
+      fn_args << atom.data
+      fn_args.concat(args.skip(2))
+
+      args1 = args[1]
+      case args1
+      when Mal::MalFunc
+        atom.data = args1.fn.call(fn_args)
+      when Proc(Array(Mal::Type), Mal::Type)
+        atom.data = args1.call(fn_args)
+      end
+      atom.data.as(Mal::Type)
     },
   }
 end
