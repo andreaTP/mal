@@ -35,9 +35,17 @@ module PrintHelper
   end
 end
 
+module Meta
+  extend self
+  META = Hash(Mal::Type, Mal::Type).new
+end
+
 module Core
   extend PrintHelper
+  extend Meta
   alias Args = Array(Mal::Type)
+
+  META = Hash(Mal::Type, Mal::Type).new
 
   NS = {
     mal_symbol("+") => ->(args : Args) {
@@ -119,7 +127,10 @@ module Core
       Reader.read_str(args[0].as(String)).as(Mal::Type)
     },
     mal_symbol("slurp") => ->(args : Args) {
-      File.read(args[0].to_s).as_mal
+      str = File.read(args[0].to_s)
+      # not mentioned in the guide ...
+      str = str.gsub(/[.]*([;].*)/, "")
+      str.as_mal
     },
     mal_symbol("atom") => ->(args : Args) {
       Mal::Atom.new(args[0]).as_mal
@@ -329,17 +340,100 @@ module Core
       Readline.readline(args[0].to_s, true).as_mal
     },
     mal_symbol("meta") => ->(args : Args) {
+      # have to verify the hashes ...
+      META[args[0]]?.as(Mal::Type)
+    },
+    mal_symbol("with-meta") => ->(args : Args) {
       args0 = args[0]
-      case args0
-      when Mal::MalFunc
-        args0.meta.as(Mal::Type)
+      # TODO - improve me
+      if args0.responds_to?(:clone)
+        case args0
+        when Mal::MalFunc
+          ret = args0.clone
+          META[ret] = args[1]
+          ret.as(Mal::Type)
+        when Mal::Vector
+          ret = Mal::Vector(Mal::Type).new
+          ret.concat(args0)
+          META[ret] = args[1]
+          ret.as(Mal::Type)
+        when Array
+          ret = [] of (Mal::Type)
+          ret.concat(args0)
+          META[ret] = args[1]
+          ret.as(Mal::Type)
+        when Mal::Map
+          ret = Mal::Map(Mal::MapKey, Mal::Type).new
+          ret.merge!(args0)
+          META[ret] = args[1]
+          ret.as(Mal::Type)
+        else # verify this
+          ret = args0
+          META[ret] = args[1]
+          ret.as(Mal::Type)
+        end
       else
+        raise "not clonable #{args[0]}"
         nil.as_mal
       end
     },
-    mal_symbol("with-meta") => ->(args : Args) {
-      ret = args[0].as(Mal::MalFunc).clone
-      ret.meta = args[1]
+    mal_symbol("number?") => ->(args : Args) {
+      args[0].is_a?(Int64).as_mal
+    },
+    mal_symbol("string?") => ->(args : Args) {
+      args[0].is_a?(String).as_mal
+    },
+    mal_symbol("fn?") => ->(args : Args) {
+      (args[0].is_a?(Proc) || (
+        args[0].is_a?(Mal::MalFunc) && !args[0].as(Mal::MalFunc).is_macro
+      )
+        ).as_mal
+    },
+    mal_symbol("macro?") => ->(args : Args) {
+      args0 = args[0]
+      case args0
+      when Mal::MalFunc
+        args0.is_macro.as_mal
+      else
+        false.as_mal
+      end
+    },
+    mal_symbol("time-ms") => ->(args : Args) {
+      Time.utc_now.epoch_ms.as_mal
+    },
+    mal_symbol("conj") => ->(args : Args) {
+      ret = nil
+      args0 = args[0]
+      case args0
+      when Mal::Vector
+        ret = Mal::Vector(Mal::Type).new
+        ret.concat(args0).concat(args.skip(1))
+      when Array
+        ret = [] of Mal::Type
+        ret.concat(args.skip(1).reverse).concat(args0)
+      end
+      ret.as_mal
+    },
+    mal_symbol("seq") => ->(args : Args) {
+      ret = nil
+      args0 = args[0]
+      case args0
+      when String
+        if !args0.empty?
+          ret = [] of Mal::Type
+          args0.chars.each { |e| ret << e.to_s }
+        end
+      when Mal::Vector
+        if !args0.empty?
+          ret = [] of Mal::Type # Mal::Vector(Mal::Type).new
+          args0.each { |e| ret << e }
+        end
+      when Array
+        if !args0.empty?
+          ret = [] of Mal::Type
+          args0.each { |e| ret << e }
+        end
+      end
       ret.as_mal
     },
   }

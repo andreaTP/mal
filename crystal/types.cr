@@ -31,9 +31,11 @@ module Mal
   end
 
   class Vector(T) < Array(T)
+    def_clone
   end
 
   class Map(MapKey, T) < Hash(MapKey, T)
+    def_clone
   end
 
   class MalFunc
@@ -43,15 +45,12 @@ module Mal
     getter fn : Proc(Array(Mal::Type), Mal::Type)
     getter is_macro : Bool
     setter is_macro : Bool
-    getter meta : Mal::Type
-    setter meta : Mal::Type
 
     def initialize(@ast, @params, @env, @fn, @is_macro = false)
     end
 
     def clone
-      ret = MalFunc.new(@ast, @params, @env, @fn, @is_macro)
-      ret.meta = @meta
+      ret = MalFunc.new(@ast, @params, @env.dup, @fn, @is_macro)
       ret
     end
   end
