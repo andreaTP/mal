@@ -1,4 +1,5 @@
 require "file"
+require "readline"
 
 require "./types"
 require "./printer"
@@ -323,6 +324,23 @@ module Core
     },
     mal_symbol("sequential?") => ->(args : Args) {
       args[0].is_a?(Array).as_mal
+    },
+    mal_symbol("readline") => ->(args : Args) {
+      Readline.readline(args[0].to_s, true).as_mal
+    },
+    mal_symbol("meta") => ->(args : Args) {
+      args0 = args[0]
+      case args0
+      when Mal::MalFunc
+        args0.meta.as(Mal::Type)
+      else
+        nil.as_mal
+      end
+    },
+    mal_symbol("with-meta") => ->(args : Args) {
+      ret = args[0].as(Mal::MalFunc).clone
+      ret.meta = args[1]
+      ret.as_mal
     },
   }
 end

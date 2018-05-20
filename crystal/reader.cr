@@ -57,6 +57,16 @@ module Reader
       return read_macro("splice-unquote", reader)
     when "~"
       return read_macro("unquote", reader)
+    when "^"
+      list = [] of Mal::Type
+      list << Mal::Symbol.new("with-meta")
+      reader.next
+      arg0 = read_form(reader, nil)
+      reader.next
+      arg1 = read_form(reader, nil)
+      list << arg1
+      list << arg0
+      return list
     when "("
       return read_list(reader, end_char: ")")
     when "["
@@ -167,12 +177,14 @@ module Reader
   def read_list(reader, end_char)
     list = [] of Mal::Type
 
-    while reader.next != end_char
-      begin
+    begin
+      while reader.next != end_char
         list << read_form(reader, end_char)
-      rescue CommentEx
-        # do nothing
       end
+    rescue ex : CommentEx
+      raise ex
+    rescue
+      raise "expected '#{end_char}', got EOF"
     end
 
     return list
