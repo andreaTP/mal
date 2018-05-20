@@ -8,7 +8,8 @@ SRCS = step0_repl.cr \
 			 step5_tco.cr \
 			 step6_file.cr \
 			 step7_quote.cr \
-			 step8_macros.cr
+			 step8_macros.cr \
+			 step9_try.cr
 
 BINS = $(SRCS:%.cr=%)
 

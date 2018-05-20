@@ -47,7 +47,7 @@ module Env
     def get(sym)
       env = find(sym)
       if env.nil?
-        raise "Not found #{sym}"
+        raise Mal::MalException.new("'#{sym}' not found")
       else
         return env.@data[sym]
       end

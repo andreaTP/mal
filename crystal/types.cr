@@ -17,6 +17,9 @@ module Mal
     @str : String
 
     def initialize(@str)
+      if !@str.starts_with?(':')
+        @str = ":#{@str}"
+      end
     end
 
     def to_s(io : IO)
@@ -53,6 +56,13 @@ module Mal
     end
   end
 
+  class MalException < Exception
+    getter err
+
+    def initialize(@err : Type)
+    end
+  end
+
   alias MapKey = Mal::Keyword | String
 
   alias Type = Mal::Symbol |
@@ -67,5 +77,6 @@ module Mal
                String |
                Proc(Array(Mal::Type), Mal::Type) |
                MalFunc |
-               Atom
+               Atom |
+               Exception
 end

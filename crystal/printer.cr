@@ -70,6 +70,8 @@ module Printer
       return str
     when Mal::Atom
       return "(atom #{mal.data})"
+    when Exception
+      return "\"#{mal.message}\""
     else
       raise "printer didn't matched the type"
     end

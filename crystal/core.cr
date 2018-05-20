@@ -181,5 +181,148 @@ module Core
         ([] of (Mal::Type)).as(Mal::Type)
       end
     },
+    mal_symbol("throw") => ->(args : Args) {
+      raise Mal::MalException.new(args[0])
+    },
+    mal_symbol("apply") => ->(args : Args) {
+      vec = [] of Mal::Type
+      args[1..-2].each { |e| vec << e }
+      last = args.last
+      case last
+      when Array
+        last.each { |e| vec << e }
+      end
+
+      args0 = args[0]
+      case args0
+      when Mal::MalFunc
+        args0.fn.call(vec).as(Mal::Type)
+      when Proc(Array(Mal::Type), Mal::Type)
+        args0.call(vec).as(Mal::Type)
+      else
+        nil.as_mal
+      end
+    },
+    mal_symbol("map") => ->(args : Args) {
+      res = [] of Mal::Type
+
+      args0 = args[0]
+      args1 = args[1]
+      case args1
+      when Array
+        args1.each do |a|
+          case args0
+          when Mal::MalFunc
+            res << args0.fn.call([a.as(Mal::Type)])
+          when Proc(Array(Mal::Type), Mal::Type)
+            res << args0.call([a.as(Mal::Type)])
+          end
+        end
+      end
+
+      res.as_mal
+    },
+    mal_symbol("nil?") => ->(args : Args) {
+      args[0].nil?.as_mal
+    },
+    mal_symbol("true?") => ->(args : Args) {
+      args0 = args[0]
+      args0.is_a?(Bool) ? args0.as_mal : false.as_mal
+      if args0.is_a?(Bool)
+        args0.as_mal
+      else
+        false.as_mal
+      end
+    },
+    mal_symbol("false?") => ->(args : Args) {
+      args0 = args[0]
+      args0.is_a?(Bool) ? (!args0).as_mal : false.as_mal
+    },
+    mal_symbol("symbol?") => ->(args : Args) {
+      args0 = args[0]
+      args0.is_a?(Mal::Symbol) ? true.as_mal : false.as_mal
+    },
+    mal_symbol("symbol") => ->(args : Args) {
+      Mal::Symbol.new(args[0].as(String)).as_mal
+    },
+    mal_symbol("keyword") => ->(args : Args) {
+      Mal::Keyword.new(":#{args[0].as(String)}").as_mal
+    },
+    mal_symbol("keyword?") => ->(args : Args) {
+      args[0].is_a?(Mal::Keyword).as_mal
+    },
+    mal_symbol("vector") => ->(args : Args) {
+      ret = Mal::Vector(Mal::Type).new
+      args.each { |e| ret << e }
+      ret.as_mal
+    },
+    mal_symbol("vector?") => ->(args : Args) {
+      args[0].is_a?(Mal::Vector).as_mal
+    },
+    mal_symbol("hash-map") => ->(args : Args) {
+      ret = Mal::Map(Mal::MapKey, Mal::Type).new
+      args.each_index do |i|
+        if i % 2 == 0
+          ret[args[i].as(Mal::MapKey)] = args[i + 1]
+        end
+      end
+      ret.as_mal
+    },
+    mal_symbol("map?") => ->(args : Args) {
+      args[0].is_a?(Mal::Map).as_mal
+    },
+    mal_symbol("assoc") => ->(args : Args) {
+      ret = Mal::Map(Mal::MapKey, Mal::Type).new
+      args0 = args[0]
+      case args0
+      when Mal::Map
+        ret.merge!(args0)
+        args.skip(1).each_index do |i|
+          argsi = args[i]
+          if i % 2 != 0
+            case argsi
+            when String | Mal::Keyword
+              ret[argsi.as(Mal::MapKey)] = args[i + 1].as_mal
+            end
+          end
+        end
+      end
+      ret.as_mal
+    },
+    mal_symbol("dissoc") => ->(args : Args) {
+      ret = Mal::Map(Mal::MapKey, Mal::Type).new
+      args0 = args[0]
+      case args0
+      when Mal::Map
+        ret.merge!(args0)
+        ret.reject!(args.skip(1))
+      end
+      ret.as_mal
+    },
+    mal_symbol("get") => ->(args : Args) {
+      args0 = args[0]
+      case args0
+      when Mal::Map(Mal::MapKey, Mal::Type)
+        args0[args[1].as(Mal::MapKey)]?.as(Mal::Type)
+      else
+        nil.as_mal
+      end
+    },
+    mal_symbol("contains?") => ->(args : Args) {
+      args[0].as(Mal::Map).has_key?(args[1].as(Mal::MapKey)).as_mal
+    },
+    mal_symbol("keys") => ->(args : Args) {
+      ret = [] of Mal::Type
+      ret.concat(args[0].as(Mal::Map).keys)
+      ret.as_mal
+    },
+    mal_symbol("vals") => ->(args : Args) {
+      ret = [] of Mal::Type
+      ret.concat(args[0].as(Mal::Map).values)
+      ret.as_mal
+    },
+    mal_symbol("sequential?") => ->(args : Args) {
+      args[0].is_a?(Array).as_mal
+    },
   }
 end
